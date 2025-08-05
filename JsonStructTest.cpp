@@ -6,6 +6,7 @@
 #include <ostream>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 template <typename T>
 struct is_optional : std::false_type {};
@@ -20,6 +21,7 @@ namespace AS {
 		float b;
 		std::string c;
 		std::optional<bool> d;
+		std::vector<my_guid> links;
 	};
 
 	// Generic to_json for visitable structs in namespace AS
@@ -52,7 +54,7 @@ namespace AS {
 	}
 }
 
-VISITABLE_STRUCT(AS::my_type, id, a, b, c, d); // register struct as visitable
+VISITABLE_STRUCT(AS::my_type, id, a, b, c, d, links); // register struct as visitable
 
 // Overload operator<< for std::optional<T>
 template<typename T>
@@ -61,6 +63,19 @@ std::ostream& operator<<(std::ostream& os, const std::optional<T>& opt) {
 		return os << *opt;
 	}
 	return os << "nullopt";
+}
+
+// Overload operator<< for std::vector<T>
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+	os << "[";
+	for (size_t i = 0; i < vec.size(); ++i) {
+		if (i > 0) {
+			os << ", ";
+		}
+		os << vec[i];
+	}
+	return os << "]";
 }
 
 // Generic operator<< for visitable structs
@@ -76,7 +91,7 @@ operator<<(std::ostream& os, const T& value) {
 int main()
 {
 	using namespace AS;
-	auto original = my_type{ my_guid{}, 42, 3.14f, "Hello World", std::optional<bool>{} };
+	auto original = my_type{ my_guid{}, 42, 3.14f, "Hello World", std::optional<bool>{}, { my_guid{}, my_guid{} } };
 
 	// Serialize
 	nlohmann::json j = original;
