@@ -2,9 +2,16 @@
 #include "nlohmann/json.hpp"
 #include "visit_struct/visit_struct.hpp"
 #include <iostream>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <type_traits>
+
+template <typename T>
+struct is_optional : std::false_type {};
+
+template <typename T>
+struct is_optional<std::optional<T>> : std::true_type {}; 
 
 namespace AS {
 	struct my_type {
@@ -12,6 +19,7 @@ namespace AS {
 		int a;
 		float b;
 		std::string c;
+		std::optional<bool> d;
 	};
 
 	// Generic to_json for visitable structs in namespace AS
@@ -23,17 +31,37 @@ namespace AS {
 		});
 	}
 
-	// Generic from_json for visitable structs in namespace AS
+	// Generic from_json for visitable structs in namespace AS (handles optional)
 	template<typename T>
 	typename std::enable_if<visit_struct::traits::is_visitable<T>::value>::type
 		from_json(const nlohmann::json& j, T& value) {
 		visit_struct::for_each(value, [&](const char* name, auto& field) {
-			j.at(name).get_to(field);
+			using FieldType = std::decay_t<decltype(field)>;
+			if constexpr (is_optional<FieldType>::value) {
+				if (auto it = j.find(name); it != j.end() && !it->is_null()) {
+					field = it->template get<typename FieldType::value_type>();
+				}
+				else {
+					field = std::nullopt;
+				}
+			}
+			else {
+				j.at(name).get_to(field);
+			}
 		});
 	}
 }
 
-VISITABLE_STRUCT(AS::my_type, id, a, b, c); // register struct as visitable
+VISITABLE_STRUCT(AS::my_type, id, a, b, c, d); // register struct as visitable
+
+// Overload operator<< for std::optional<T>
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::optional<T>& opt) {
+	if (opt) {
+		return os << *opt;
+	}
+	return os << "nullopt";
+}
 
 // Generic operator<< for visitable structs
 template<typename T>
@@ -48,7 +76,7 @@ operator<<(std::ostream& os, const T& value) {
 int main()
 {
 	using namespace AS;
-	auto original = my_type{ my_guid{}, 42, 3.14f, "Hello World" };
+	auto original = my_type{ my_guid{}, 42, 3.14f, "Hello World", std::optional<bool>{} };
 
 	// Serialize
 	nlohmann::json j = original;
