@@ -29,5 +29,8 @@
     <ClInclude Include="my_guid.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="my_array.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
