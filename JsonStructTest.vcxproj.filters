@@ -32,5 +32,8 @@
     <ClInclude Include="my_array.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="boiler_plate.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

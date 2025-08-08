@@ -158,6 +158,7 @@
     <ClCompile Include="JsonStructTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="boiler_plate.hpp" />
     <ClInclude Include="my_array.hpp" />
     <ClInclude Include="my_guid.hpp" />
     <ClInclude Include="nlohmann\json.hpp" />
