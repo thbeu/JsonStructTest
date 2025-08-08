@@ -1,0 +1,1 @@
+This proof of concept demonstrates generic JSON serialization/deserialization of C++ structs using modern C++ techniques of libraries [nlohmann::json](https://github.com/nlohmann/json) and [visit_struct](https://github.com/cbeck88/visit_struct).
